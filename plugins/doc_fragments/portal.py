@@ -1,5 +1,6 @@
 class ModuleDocFragment(object):
     DOCUMENTATION = r"""
+    options:
         portal:
             description:
                 - EdwinAI portal to target.

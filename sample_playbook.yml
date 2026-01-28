@@ -41,4 +41,3 @@
     - name: Debug insights
       ansible.builtin.debug:
         var: insights_output
-
