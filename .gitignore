@@ -1,5 +1,8 @@
 /tests/output/
 /changelogs/.plugin-cache.yaml
+.idea/
+*.iml
+vault.yml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -29,6 +32,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+*.tar.gz
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

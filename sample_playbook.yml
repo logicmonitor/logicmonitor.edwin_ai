@@ -1,0 +1,44 @@
+- name: Example playbook that leverages vault-encrypted secrets
+  hosts: localhost
+  vars_files:
+    - vault.yml
+  collections:
+    - logicmonitor.edwin_ai
+  tasks:
+    - name: Output access id
+      ansible.builtin.debug:
+        msg: "Access id: {{ edwin_access_id }}"
+    - name: Query alerts
+      query_api:
+        access_id: "{{ edwin_access_id }}"
+        access_key: "{{ edwin_access_key }}"
+        portal: lmstaging
+        record_type: alerts
+        limit: 2
+      register: alerts_output
+    - name: Debug alerts
+      ansible.builtin.debug:
+        var: alerts_output
+    - name: Query events
+      query_api:
+        access_id: "{{ edwin_access_id }}"
+        access_key: "{{ edwin_access_key }}"
+        portal: lmstaging
+        record_type: events
+        limit: 2
+      register: events_output
+    - name: Debug events
+      ansible.builtin.debug:
+        var: events_output
+    - name: Query insights
+      query_api:
+        access_id: "{{ edwin_access_id }}"
+        access_key: "{{ edwin_access_key }}"
+        portal: lmstaging
+        record_type: insights
+        limit: 2
+      register: insights_output
+    - name: Debug insights
+      ansible.builtin.debug:
+        var: insights_output
+
