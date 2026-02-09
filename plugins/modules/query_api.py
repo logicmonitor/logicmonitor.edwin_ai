@@ -9,10 +9,10 @@
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils.rest_methods import get_auth_token
-from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils.rest_methods import post
+from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import get_auth_token
+from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import post
 
-import json
+from json import dumps
 import time
 
 DOCUMENTATION = r"""
@@ -128,7 +128,7 @@ def _query(module: AnsibleModule) -> str:
     bearer_token = get_auth_token(portal, p['access_id'], p['access_key'])
 
     request = _create_request(module)
-    response = post(endpoint, bearer_token, json.dumps(request))
+    response = post(endpoint, bearer_token, dumps(request))
 
     # TODO error handling
     return response.json()
@@ -167,7 +167,7 @@ def _create_request(module: AnsibleModule) -> dict:
     return request
 
 
-def _create_filter(severity_field: str, epoch_field: str, epoch_value: long) -> dict:
+def _create_filter(severity_field: str, epoch_field: str, epoch_value: int) -> dict:
     return {
         "expression": {
             "AND": [
@@ -199,8 +199,8 @@ def _create_filter(severity_field: str, epoch_field: str, epoch_value: long) -> 
 def _create_order(epoch_field: str) -> list:
     return [
         {
-           "type": "desc",
-           "field": epoch_field
+            "type": "desc",
+            "field": epoch_field
         },
    ]
 
