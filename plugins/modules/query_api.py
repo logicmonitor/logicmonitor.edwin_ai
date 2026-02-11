@@ -8,13 +8,6 @@
 # GNU General Public License v3.0+
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import get_auth_token
-from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import post
-
-from json import dumps
-import time
-
 DOCUMENTATION = r"""
 ---
 module: query_api
@@ -49,6 +42,7 @@ options:
             - Field(s) to return from the API.
             - If not provided, all fields will be returned.
         type: list
+        elements: str
         default: []
     limit:
         description:
@@ -98,6 +92,13 @@ failed:
     sample: false
 """
 
+from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import get_auth_token
+from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import post
+
+from json import dumps
+import time
+
 
 def main():
     module = AnsibleModule(
@@ -109,7 +110,7 @@ def main():
             record_type=dict(required=True, type="str", choices=['alerts', 'events', 'insights']),
 
             # optional
-            fields=dict(type="list", default=[]),
+            fields=dict(type="list", elements="str", default=[]),
             limit=dict(type="int", default=5),
             lookback_window=dict(type="int", default=86_400)
         ),
@@ -202,7 +203,7 @@ def _create_order(epoch_field: str) -> list:
             "type": "desc",
             "field": epoch_field
         },
-   ]
+    ]
 
 
 if __name__ == "__main__":

@@ -56,7 +56,7 @@ These commands are to be executed in the project root directory (i.e., [./](../)
 ansible-galaxy collection build
 
 # install the collection locally; add '-f' to force
-ansible-galaxy collection install <name of tar.gz> -p collections/
+ansible-galaxy collection install path/to/tarball -p collections/
 ```
 
 Once the collection is accessible, you can execute a playbook against it:
@@ -64,5 +64,23 @@ Once the collection is accessible, you can execute a playbook against it:
 ansible-playbook sample_playbook --ask-vault-pass
 ```
 
-[ansible-vault]: https://docs.ansible.com/projects/ansible/latest/vault_guide/index.html
+## Publication
 
+After merging code to the repo, the collection should be republished.
+This does not happen automatically.
+
+To publish, you'll need an Ansible API token from [Ansible galaxy][ansible-galaxy]:
+1. Click "Login" (in upper-right corner).
+1. Follow the instructions to link Galaxy to your GitHub account.
+1. Once logged in, navigate to "Collections > API token".
+1. Click "Load token".
+   * Persist this token so you don't lose it.
+   Stashing the token in your [vault](#create-ansible-vault) is encouraged.
+
+Assuming you have an artifact that is built from `main` (with the new changes):
+```shell
+ansible-galaxy collection publish path/to/tarball --token <galaxy api token>
+```
+
+[ansible-galaxy]: https://galaxy.ansible.com/
+[ansible-vault]: https://docs.ansible.com/projects/ansible/latest/vault_guide/index.html

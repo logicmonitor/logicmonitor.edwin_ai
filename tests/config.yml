@@ -1,0 +1,5 @@
+# from https://github.com/ansible/ansible/blob/devel/test/lib/ansible_test/config/config.yml
+
+modules:
+  # This collection is not compatible with, and does not support, EOL Python <3.10.
+  python_requires: '>=3.10'
