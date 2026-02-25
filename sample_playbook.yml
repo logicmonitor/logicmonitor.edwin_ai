@@ -2,14 +2,12 @@
   hosts: localhost
   vars_files:
     - vault.yml
-  collections:
-    - logicmonitor.edwin_ai
   tasks:
     - name: Output access id
       ansible.builtin.debug:
         msg: "Access id: {{ edwin_access_id }}"
     - name: Query alerts
-      query_api:
+      logicmonitor.edwin_ai.query_api:
         access_id: "{{ edwin_access_id }}"
         access_key: "{{ edwin_access_key }}"
         portal: lmstaging
@@ -20,7 +18,7 @@
       ansible.builtin.debug:
         var: alerts_output
     - name: Query events
-      query_api:
+      logicmonitor.edwin_ai.query_api:
         access_id: "{{ edwin_access_id }}"
         access_key: "{{ edwin_access_key }}"
         portal: lmstaging
@@ -31,7 +29,7 @@
       ansible.builtin.debug:
         var: events_output
     - name: Query insights
-      query_api:
+      logicmonitor.edwin_ai.query_api:
         access_id: "{{ edwin_access_id }}"
         access_key: "{{ edwin_access_key }}"
         portal: lmstaging

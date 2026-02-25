@@ -30,7 +30,7 @@ requirements:
 options:
     record_type:
         description:
-            - Record type to retrieve from Edwin.
+            - Record type to retrieve.
         required: true
         type: str
         choices:
@@ -65,7 +65,7 @@ EXAMPLES = r"""
     - vault.yml
   tasks:
     - name: Retrieve alerts for portal 'foo'
-      logicmonitor.edwin_ai.insights:
+      logicmonitor.edwin_ai.query_api:
         access_id: "{{ edwin_access_id }}"
         access_key: "{{ edwin_access_key }}"
         portal: foo
