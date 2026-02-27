@@ -1,0 +1,38 @@
+---
+name: ansible-lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  collection_path: ansible_collections/logicmonitor/edwin_ai
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out collection
+        uses: actions/checkout@v4
+        with:
+          path: ansible_collections/logicmonitor/edwin_ai
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install ansible-lint
+
+      - name: Install collection dependencies
+        run: |
+          cd "$collection_path"
+          if [ -f requirements.yml ]; then
+            ansible-galaxy collection install -r requirements.yml
+          fi
+
+      - name: Run ansible-lint
+        run: ansible-lint "$collection_path"
