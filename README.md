@@ -2,12 +2,12 @@
 <!-- Add CI and code coverage badges here. Samples included below. -->
 [![CI](https://github.com/ansible-collections/logicmonitor.edwin_ai/workflows/CI/badge.svg?event=push)](https://github.com/ansible-collections/logicmonitor.edwin_ai/actions) [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/logicmonitor.edwin_ai)](https://codecov.io/gh/ansible-collections/logicmonitor.edwin_ai)
 
-*Automate interactions with LogicMonitor’s Edwin AI services using Ansible.*
+*Automate interactions with LogicMonitor's Edwin AI services using Ansible.*
 
-[Edwin AI][edwin-ai] is [LogicMonitor][logicmonitor]’s agentic AI-powered ITOps platform that surfaces intelligent insights.
+[Edwin AI][edwin-ai] is [LogicMonitor][logicmonitor]'s agentic AI-powered ITOps platform that surfaces intelligent insights.
 It provides automation to proactively detect, diagnose, and remediate incidents thereby reducing alert noise and time to resolution.
 
-This collection provides interactions with LogicMonitor’s Edwin AI enabling automation of incident response, AI-driven remediation steps, and operational tasks.
+This collection provides interactions with LogicMonitor's Edwin AI enabling automation of incident response, AI-driven remediation steps, and operational tasks.
 
 ## Requirements
 
