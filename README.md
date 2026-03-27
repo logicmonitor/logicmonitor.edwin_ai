@@ -66,7 +66,7 @@ See the [changelog](https://github.com/logicmonitor/logicmonitor.edwin_ai/blob/m
 
 Apache License, Version 2.0
 
-See [LICENSE](https://github.com/logicmonitor/logicmonitor.edwin_ai/LICENSE) to see the full text.
+See [LICENSE](https://github.com/logicmonitor/logicmonitor.edwin_ai/blob/main/LICENSE) to see the full text.
 
 [create-issue]: https://github.com/logicmonitor/logicmonitor.edwin_ai/issues/new
 [edwin-ai]: https://www.logicmonitor.com/edwin-ai
