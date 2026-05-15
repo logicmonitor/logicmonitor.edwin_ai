@@ -1,0 +1,61 @@
+---
+- name: Edwin AI Alert Remediation
+  hosts: all
+  sources:
+    - logicmonitor.edwin_ai.webhook:
+        host: 0.0.0.0
+        port: 5000
+
+  rules:
+    - name: Critical CPU alert - restart service
+      condition: >-
+        event.edwin_ai.severity == "critical" and
+        event.edwin_ai.metric is match("cpu", ignorecase=true)
+      action:
+        run_playbook:
+          name: remediate_cpu.yml
+          extra_vars:
+            target_host: "{{ event.edwin_ai.host }}"
+            alert_id: "{{ event.edwin_ai.alert_id }}"
+            metric: "{{ event.edwin_ai.metric }}"
+
+    - name: Disk space alert - cleanup
+      condition: >-
+        event.edwin_ai.severity in ["critical", "error"] and
+        event.edwin_ai.metric is match("disk", ignorecase=true)
+      action:
+        run_playbook:
+          name: remediate_disk.yml
+          extra_vars:
+            target_host: "{{ event.edwin_ai.host }}"
+            alert_id: "{{ event.edwin_ai.alert_id }}"
+
+    - name: Memory alert - collect diagnostics
+      condition: >-
+        event.edwin_ai.severity == "critical" and
+        event.edwin_ai.metric is match("memory", ignorecase=true)
+      action:
+        run_playbook:
+          name: collect_diagnostics.yml
+          extra_vars:
+            target_host: "{{ event.edwin_ai.host }}"
+            alert_id: "{{ event.edwin_ai.alert_id }}"
+            diagnostic_type: memory
+
+    - name: Service down alert - restart
+      condition: >-
+        event.edwin_ai.event_type == "alert" and
+        event.edwin_ai.message is match("down|stopped|unavailable", ignorecase=true)
+      action:
+        run_playbook:
+          name: restart_service.yml
+          extra_vars:
+            target_host: "{{ event.edwin_ai.host }}"
+            alert_id: "{{ event.edwin_ai.alert_id }}"
+            service_info: "{{ event.edwin_ai.message }}"
+
+    - name: Alert cleared - log resolution
+      condition: event.edwin_ai.status == "cleared"
+      action:
+        print_event:
+          pretty: true
