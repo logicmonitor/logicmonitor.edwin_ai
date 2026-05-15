@@ -1,0 +1,40 @@
+---
+- name: Edwin AI Kafka Event Stream
+  hosts: all
+  sources:
+    - logicmonitor.edwin_ai.kafka:
+        topic: edwin-ai-alerts
+        bootstrap_servers: "{{ KAFKA_BOOTSTRAP_SERVERS | default('localhost:9092') }}"
+        group_id: eda-edwin-ai
+        security_protocol: "{{ KAFKA_SECURITY_PROTOCOL | default('PLAINTEXT') }}"
+
+  rules:
+    - name: Critical alert - auto-remediate
+      condition: >-
+        event.edwin_ai.severity == "critical" and
+        event.edwin_ai.status == "active"
+      action:
+        run_playbook:
+          name: remediate_critical.yml
+          extra_vars:
+            target_host: "{{ event.edwin_ai.host }}"
+            alert_id: "{{ event.edwin_ai.alert_id }}"
+            severity: "{{ event.edwin_ai.severity }}"
+
+    - name: Error alert - escalate
+      condition: >-
+        event.edwin_ai.severity == "error" and
+        event.edwin_ai.status == "active"
+      action:
+        run_playbook:
+          name: escalate_alert.yml
+          extra_vars:
+            target_host: "{{ event.edwin_ai.host }}"
+            alert_id: "{{ event.edwin_ai.alert_id }}"
+            message: "{{ event.edwin_ai.message }}"
+
+    - name: Log all events
+      condition: event.edwin_ai is defined
+      action:
+        print_event:
+          pretty: true

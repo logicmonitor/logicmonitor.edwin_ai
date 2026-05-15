@@ -1,0 +1,44 @@
+---
+- name: Edwin AI Alert Polling
+  hosts: all
+  sources:
+    - logicmonitor.edwin_ai.alerts:
+        portal: "{{ EDWIN_PORTAL }}"
+        access_id: "{{ EDWIN_ACCESS_ID }}"
+        access_key: "{{ EDWIN_ACCESS_KEY }}"
+        interval: 60
+        severity: warning
+
+  rules:
+    - name: New critical alert - immediate remediation
+      condition: >-
+        event.edwin_ai.severity == "critical" and
+        event.edwin_ai.status == "active"
+      action:
+        run_playbook:
+          name: remediate_critical.yml
+          extra_vars:
+            target_host: "{{ event.edwin_ai.host }}"
+            alert_id: "{{ event.edwin_ai.alert_id }}"
+            severity: "{{ event.edwin_ai.severity }}"
+            message: "{{ event.edwin_ai.message }}"
+
+    - name: New error alert - create ticket and notify
+      condition: >-
+        event.edwin_ai.severity == "error" and
+        event.edwin_ai.status == "active"
+      action:
+        run_playbook:
+          name: create_incident.yml
+          extra_vars:
+            target_host: "{{ event.edwin_ai.host }}"
+            alert_id: "{{ event.edwin_ai.alert_id }}"
+            message: "{{ event.edwin_ai.message }}"
+
+    - name: Alert cleared - close ticket
+      condition: event.edwin_ai.event_type == "alert_cleared"
+      action:
+        run_playbook:
+          name: close_incident.yml
+          extra_vars:
+            alert_id: "{{ event.edwin_ai.alert_id }}"
