@@ -15,6 +15,7 @@ Arguments:
 
 import asyncio
 import logging
+import re
 from typing import Any
 
 IMPORT_ERRORS = []
@@ -32,16 +33,29 @@ SEVERITY_LEVELS = {
     "info": 1,
 }
 
+_VALID_PORTAL = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{0,62}$")
+
+
+def _validate_portal(portal: str) -> str:
+    if not _VALID_PORTAL.match(portal):
+        raise ValueError(
+            f"Invalid portal name: {portal!r}. "
+            "Must be alphanumeric with hyphens/dots/underscores."
+        )
+    return portal
+
 
 async def main(queue: asyncio.Queue, args: dict[str, Any]) -> None:
     """Poll Edwin AI for alerts and forward to the EDA rulebook."""
     for exc in IMPORT_ERRORS:
         raise exc
 
-    portal = args["portal"]
+    portal = _validate_portal(args["portal"])
     access_id = args["access_id"]
     access_key = args["access_key"]
     interval = int(args.get("interval", 60))
+    if interval < 10:
+        raise ValueError("Polling interval must be at least 10 seconds")
     min_severity = args.get("severity", "warning").lower()
     resource_group = args.get("resource_group", "")
     min_level = SEVERITY_LEVELS.get(min_severity, 2)
@@ -84,13 +98,14 @@ async def main(queue: asyncio.Queue, args: dict[str, Any]) -> None:
                 })
                 del seen_alerts[alert_id]
 
-        except Exception as exc:
-            logger.error("Error polling Edwin AI: %s", exc)
+        except Exception:
+            logger.exception("Error polling Edwin AI alerts")
 
         await asyncio.sleep(interval)
 
 
 def _get_token(portal: str, access_id: str, access_key: str) -> str:
+    portal = _validate_portal(portal)
     response = requests.post(
         f"https://{portal}.dexda.ai/auth/token",
         data={
@@ -99,6 +114,7 @@ def _get_token(portal: str, access_id: str, access_key: str) -> str:
             "client_secret": access_key,
         },
         timeout=30,
+        verify=True,
     )
     response.raise_for_status()
     return response.json()["access_token"]
@@ -107,6 +123,7 @@ def _get_token(portal: str, access_id: str, access_key: str) -> str:
 def _fetch_alerts(
     portal: str, token: str, resource_group: str = ""
 ) -> list[dict]:
+    portal = _validate_portal(portal)
     url = f"https://{portal}.dexda.ai/api/v1/alerts"
     params: dict[str, Any] = {"status": "active", "size": 100}
     if resource_group:
@@ -117,6 +134,7 @@ def _fetch_alerts(
         headers={"Authorization": f"Bearer {token}"},
         params=params,
         timeout=30,
+        verify=True,
     )
     response.raise_for_status()
     data = response.json()

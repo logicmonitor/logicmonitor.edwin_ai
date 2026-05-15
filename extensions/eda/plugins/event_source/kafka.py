@@ -79,12 +79,13 @@ async def main(queue: asyncio.Queue, args: dict[str, Any]) -> None:
                 data = message.value
                 if isinstance(data, str):
                     data = json.loads(data)
+                if not isinstance(data, dict):
+                    logger.warning("Skipping non-dict Kafka message")
+                    continue
                 event = _normalize_event(data)
                 await queue.put(event)
-            except (json.JSONDecodeError, TypeError) as exc:
-                logger.warning(
-                    "Skipping malformed Kafka message: %s", exc
-                )
+            except (json.JSONDecodeError, TypeError):
+                logger.warning("Skipping malformed Kafka message")
     finally:
         await consumer.stop()
 
