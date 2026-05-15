@@ -76,9 +76,11 @@ jobs:
           # Add new versions announced in
           # https://github.com/ansible-collections/news-for-maintainers in a timely manner,
           # consider dropping testing against EOL versions and versions you don't support.
+          - stable-2.16
           - stable-2.18
           - stable-2.19
           - stable-2.20
+          - stable-2.21
           - devel
         # - milestone
 
@@ -126,9 +128,11 @@ jobs:
           # Add new versions announced in
           # https://github.com/ansible-collections/news-for-maintainers in a timely manner,
           # consider dropping testing against EOL versions and versions you don't support.
+          - stable-2.16
           - stable-2.18
           - stable-2.19
           - stable-2.20
+          - stable-2.21
           - devel
         # - milestone
 
@@ -186,6 +190,13 @@ jobs:
           # Add new versions announced in
           # https://github.com/ansible-collections/news-for-maintainers in a timely manner,
           # consider dropping testing against EOL versions and versions you don't support.
+          # ansible-core 2.16
+          - ansible: stable-2.16
+            python: '3.10'
+          - ansible: stable-2.16
+            python: '3.11'
+          - ansible: stable-2.16
+            python: '3.12'
           # ansible-core 2.18
           - ansible: stable-2.18
             python: '3.10'
@@ -214,6 +225,15 @@ jobs:
           - ansible: stable-2.20
             python: '3.13'
           - ansible: stable-2.20
+            python: '3.14'
+          # ansible-core 2.21
+          - ansible: stable-2.21
+            python: '3.11'
+          - ansible: stable-2.21
+            python: '3.12'
+          - ansible: stable-2.21
+            python: '3.13'
+          - ansible: stable-2.21
             python: '3.14'
 
 
