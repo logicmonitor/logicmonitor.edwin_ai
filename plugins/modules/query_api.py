@@ -104,6 +104,7 @@ failed:
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import get_auth_token
 from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import post
+from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import _validate_portal
 
 from json import dumps
 import time
@@ -132,7 +133,7 @@ def main():
 def _query(module: AnsibleModule) -> str:
     p = module.params
 
-    portal = p['portal']
+    portal = _validate_portal(p['portal'])
     endpoint = f"https://{portal}.dexda.ai/ui/query/records"
     # TODO cache token (and support expiry)
     bearer_token = get_auth_token(portal, p['access_id'], p['access_key'])
