@@ -15,23 +15,33 @@ import json
 import hashlib
 import hmac
 import logging
+import re
 from typing import Any
 from aiohttp import web
 
 logger = logging.getLogger(__name__)
 
+_VALID_HOST = re.compile(r"^[\d.a-fA-F:]+$")
+_MAX_PAYLOAD_BYTES = 1_048_576
+
 
 async def main(queue: asyncio.Queue, args: dict[str, Any]) -> None:
     """Receive Edwin AI webhook events and forward to the EDA rulebook."""
     host = str(args.get("host", "0.0.0.0"))
+    if not _VALID_HOST.match(host):
+        raise ValueError(f"Invalid bind address: {host!r}")
     port = int(args.get("port", 5000))
+    if not 1 <= port <= 65535:
+        raise ValueError(f"Port must be between 1 and 65535, got {port}")
     token = args.get("token", "")
 
-    app = web.Application()
+    app = web.Application(client_max_size=_MAX_PAYLOAD_BYTES)
 
     async def _handle_event(request: web.Request) -> web.Response:
         try:
             payload = await request.read()
+            if len(payload) > _MAX_PAYLOAD_BYTES:
+                return web.Response(status=413, text="Payload too large")
 
             if token:
                 signature = request.headers.get("X-Edwin-Signature", "")
@@ -39,18 +49,22 @@ async def main(queue: asyncio.Queue, args: dict[str, Any]) -> None:
                     token.encode(), payload, hashlib.sha256
                 ).hexdigest()
                 if not hmac.compare_digest(signature, expected):
-                    logger.warning("Invalid webhook signature")
+                    logger.warning("Invalid webhook signature received")
                     return web.Response(status=401, text="Invalid signature")
 
             data = json.loads(payload)
+            if not isinstance(data, dict):
+                return web.Response(status=400, text="Invalid payload format")
             event = _normalize_event(data)
             await queue.put(event)
             return web.Response(status=200, text="OK")
         except json.JSONDecodeError:
-            logger.error("Invalid JSON payload")
+            logger.error("Received invalid JSON payload")
             return web.Response(status=400, text="Invalid JSON")
-        except Exception as exc:
-            logger.exception("Error processing webhook: %s", exc)
+        except web.HTTPException:
+            raise
+        except Exception:
+            logger.exception("Error processing webhook event")
             return web.Response(status=500, text="Internal error")
 
     async def _health(request: web.Request) -> web.Response:
