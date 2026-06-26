@@ -10,12 +10,16 @@
         access_id: "{{ EDWIN_ACCESS_ID }}"
         access_key: "{{ EDWIN_ACCESS_KEY }}"
         interval: 60
-        severity: warning
+        # min_severity is the integer cf.eventSeverity threshold (higher = more severe)
+        min_severity: 4
+        lookback: 86400
 
+  # NOTE: for the polling source, event.edwin_ai.severity is the INTEGER
+  # cf.eventSeverity (higher is more severe), so conditions use numeric comparisons.
   rules:
-    - name: New critical alert - immediate remediation
+    - name: High-severity alert - immediate remediation
       condition: >-
-        event.edwin_ai.severity == "critical" and
+        event.edwin_ai.severity >= 4 and
         event.edwin_ai.status == "active"
       action:
         run_playbook:
@@ -26,9 +30,9 @@
             severity: "{{ event.edwin_ai.severity }}"
             message: "{{ event.edwin_ai.message }}"
 
-    - name: New error alert - create ticket and notify
+    - name: Medium-severity alert - create ticket and notify
       condition: >-
-        event.edwin_ai.severity == "error" and
+        event.edwin_ai.severity == 3 and
         event.edwin_ai.status == "active"
       action:
         run_playbook:

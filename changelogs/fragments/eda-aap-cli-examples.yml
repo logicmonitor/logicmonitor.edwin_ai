@@ -5,3 +5,4 @@ minor_changes:
 bugfixes:
   - webhook event source - guard the optional ``aiohttp`` import so module import (and sanity/import checks) no longer fail when the dependency is absent.
   - requirements - declare the ``aiohttp`` and ``aiokafka`` runtime dependencies needed by the webhook and kafka event sources in ``requirements.txt`` and ``meta/ee-requirements.txt``.
+  - alerts (polling) event source - query the real Edwin AI endpoint ``POST /ui/query/records`` (as the ``query_api`` module does) instead of the non-existent ``GET /api/v1/alerts`` that returned HTTP 404, and read records from ``results``. Normalize using the real record keys (``cf.*``/``meta.*``/``alertDetails.*``); ``severity`` is now the integer ``cf.eventSeverity``. Adds ``min_severity`` (integer threshold) and ``lookback`` arguments.
