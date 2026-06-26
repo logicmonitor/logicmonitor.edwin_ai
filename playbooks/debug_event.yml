@@ -1,0 +1,25 @@
+---
+# Minimal example / smoke-test playbook for EDA-triggered job templates.
+#
+# Point an Automation Controller Job Template (e.g. "Edwin AI - Remediate CPU")
+# at this playbook to verify the Event-Driven Ansible -> Controller hand-off end
+# to end. It only prints the variables the rulebook passed in (via the rule's
+# `extra_vars`) and the matching event payload, so it is safe to run anywhere.
+#
+# Replace this with real remediation logic for production use.
+- name: Edwin AI - debug event
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Show variables passed from the rulebook
+      ansible.builtin.debug:
+        msg:
+          - "target_host: {{ target_host | default('n/a') }}"
+          - "alert_id: {{ alert_id | default('n/a') }}"
+          - "severity: {{ severity | default('n/a') }}"
+          - "message: {{ message | default('n/a') }}"
+
+    - name: Show the full matching event (when include_events is enabled)
+      ansible.builtin.debug:
+        var: ansible_eda.event
+      when: ansible_eda is defined
