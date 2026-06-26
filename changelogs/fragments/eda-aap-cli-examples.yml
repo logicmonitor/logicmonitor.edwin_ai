@@ -1,0 +1,7 @@
+---
+minor_changes:
+  - webhook event source - accept the standard ``X-Hub-Signature-256`` HMAC header (with optional ``sha256=`` prefix) in addition to the legacy ``X-Edwin-Signature`` header for signature verification.
+  - eda rulebooks - add AAP-ready example rulebooks under ``extensions/eda/rulebooks/aap/`` that use ``run_job_template`` (supported by the AAP EDA controller), alongside the existing ``ansible-rulebook`` CLI examples that use ``run_playbook``. Includes a raw-payload variant for the AAP gateway Event Stream path.
+bugfixes:
+  - webhook event source - guard the optional ``aiohttp`` import so module import (and sanity/import checks) no longer fail when the dependency is absent.
+  - requirements - declare the ``aiohttp`` and ``aiokafka`` runtime dependencies needed by the webhook and kafka event sources in ``requirements.txt`` and ``meta/ee-requirements.txt``.

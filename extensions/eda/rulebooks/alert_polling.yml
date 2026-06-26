@@ -1,4 +1,7 @@
 ---
+# CLI example: uses `run_playbook`, which is supported only by the
+# `ansible-rulebook` CLI. To run on the AAP controller, use the equivalent
+# rulebook under `extensions/eda/rulebooks/aap/` (which uses `run_job_template`).
 - name: Edwin AI Alert Polling
   hosts: all
   sources:

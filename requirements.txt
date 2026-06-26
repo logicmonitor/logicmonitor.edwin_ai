@@ -1,1 +1,4 @@
 requests
+# Event-Driven Ansible source plugins:
+aiohttp  # required by the 'webhook' event source
+aiokafka  # required by the 'kafka' event source

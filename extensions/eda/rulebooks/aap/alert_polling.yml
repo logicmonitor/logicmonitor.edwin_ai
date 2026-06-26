@@ -1,0 +1,58 @@
+---
+# AAP example: uses `run_job_template`, supported by the AAP EDA controller.
+# Each referenced job template must exist in the Automation Controller with
+# "Prompt on launch" enabled for Variables so the `extra_vars` below are accepted.
+# (Set `include_events: false` only if you do NOT want the full matching event
+# injected alongside them.)
+# This rulebook uses the polling source, which is not affected by event-stream
+# source swapping, so the normalized `event.edwin_ai.*` fields are always present.
+# For local `ansible-rulebook` CLI runs, see the variant in the parent directory.
+- name: Edwin AI Alert Polling
+  hosts: all
+  sources:
+    - logicmonitor.edwin_ai.alerts:
+        portal: "{{ EDWIN_PORTAL }}"
+        access_id: "{{ EDWIN_ACCESS_ID }}"
+        access_key: "{{ EDWIN_ACCESS_KEY }}"
+        interval: 60
+        severity: warning
+
+  rules:
+    - name: New critical alert - immediate remediation
+      condition: >-
+        event.edwin_ai.severity == "critical" and
+        event.edwin_ai.status == "active"
+      action:
+        run_job_template:
+          name: Edwin AI - Remediate Critical
+          organization: Default
+          job_args:
+            extra_vars:
+              target_host: "{{ event.edwin_ai.host }}"
+              alert_id: "{{ event.edwin_ai.alert_id }}"
+              severity: "{{ event.edwin_ai.severity }}"
+              message: "{{ event.edwin_ai.message }}"
+
+    - name: New error alert - create ticket and notify
+      condition: >-
+        event.edwin_ai.severity == "error" and
+        event.edwin_ai.status == "active"
+      action:
+        run_job_template:
+          name: Edwin AI - Create Incident
+          organization: Default
+          job_args:
+            extra_vars:
+              target_host: "{{ event.edwin_ai.host }}"
+              alert_id: "{{ event.edwin_ai.alert_id }}"
+              message: "{{ event.edwin_ai.message }}"
+
+    - name: Alert cleared - close ticket
+      condition: event.edwin_ai.event_type == "alert_cleared"
+      action:
+        run_job_template:
+          name: Edwin AI - Close Incident
+          organization: Default
+          job_args:
+            extra_vars:
+              alert_id: "{{ event.edwin_ai.alert_id }}"

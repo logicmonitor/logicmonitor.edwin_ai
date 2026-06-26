@@ -1,0 +1,44 @@
+---
+# AAP example for the GATEWAY EVENT STREAM path (raw payload).
+#
+# Use this when you attach an AAP gateway Event Stream to the activation. In that
+# mode AAP replaces the webhook source with its own receiver, so the
+# `logicmonitor.edwin_ai.webhook` plugin does NOT run and the rulebook receives
+# the RAW payload exactly as the sender posted it (no `event.edwin_ai.*`).
+#
+# TEMPLATE - the field paths below assume a payload like:
+#   {"alert": {"name": "...", "severity": "CRITICAL"}, "host": "web-server-01"}
+# Your real payload/wrapping may differ. Confirm the exact paths in the Event
+# Stream "Body" view (temporarily disable "Forward events to rulebook activation"),
+# then adjust the conditions accordingly. Severity here is matched case-insensitively
+# because the raw payload is not normalized to lower-case.
+#
+# The webhook source below is a placeholder; it is swapped out when you map the
+# Event Stream to this source in the rulebook activation.
+- name: Edwin AI Alert Remediation (Event Stream / raw payload)
+  hosts: all
+  sources:
+    - logicmonitor.edwin_ai.webhook:
+        host: 0.0.0.0
+        port: 5000
+
+  rules:
+    - name: Critical alert - remediate
+      condition: >-
+        event.payload.alert.severity is defined and
+        event.payload.alert.severity in ["critical", "CRITICAL", "Critical"]
+      action:
+        run_job_template:
+          name: Edwin AI - Remediate Critical
+          organization: Default
+          job_args:
+            extra_vars:
+              target_host: "{{ event.payload.host }}"
+              alert_name: "{{ event.payload.alert.name }}"
+              severity: "{{ event.payload.alert.severity }}"
+
+    - name: Log all events (use this first to inspect the raw shape)
+      condition: event.payload is defined
+      action:
+        print_event:
+          pretty: true

@@ -8,6 +8,11 @@ Arguments:
     host: Bind address for the webhook listener (default: 0.0.0.0)
     port: Port to listen on (default: 5000)
     token: Optional shared secret for HMAC signature verification
+
+When ``token`` is set, the request signature is validated against an
+HMAC-SHA256 of the raw body. The standard ``X-Hub-Signature-256`` header is
+supported (value may be prefixed with ``sha256=``), as is the legacy
+``X-Edwin-Signature`` header (raw hex) for backward compatibility.
 """
 
 import asyncio
@@ -17,7 +22,12 @@ import hmac
 import logging
 import re
 from typing import Any
-from aiohttp import web
+
+IMPORT_ERRORS = []
+try:
+    from aiohttp import web
+except ImportError as ie:
+    IMPORT_ERRORS.append(ie)
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +37,12 @@ _MAX_PAYLOAD_BYTES = 1_048_576
 
 async def main(queue: asyncio.Queue, args: dict[str, Any]) -> None:
     """Receive Edwin AI webhook events and forward to the EDA rulebook."""
+    for exc in IMPORT_ERRORS:
+        raise ImportError(
+            "The 'aiohttp' package is required for the webhook event source. "
+            "Install it with: pip install aiohttp"
+        ) from exc
+
     host = str(args.get("host", "0.0.0.0"))
     if not _VALID_HOST.match(host):
         raise ValueError(f"Invalid bind address: {host!r}")
@@ -44,11 +60,10 @@ async def main(queue: asyncio.Queue, args: dict[str, Any]) -> None:
                 return web.Response(status=413, text="Payload too large")
 
             if token:
-                signature = request.headers.get("X-Edwin-Signature", "")
                 expected = hmac.new(
                     token.encode(), payload, hashlib.sha256
                 ).hexdigest()
-                if not hmac.compare_digest(signature, expected):
+                if not _verify_signature(request.headers, expected):
                     logger.warning("Invalid webhook signature received")
                     return web.Response(status=401, text="Invalid signature")
 
@@ -85,6 +100,29 @@ async def main(queue: asyncio.Queue, args: dict[str, Any]) -> None:
             await asyncio.sleep(3600)
     finally:
         await runner.cleanup()
+
+
+def _verify_signature(headers: Any, expected_hex: str) -> bool:
+    """Validate an HMAC-SHA256 signature against the supported headers.
+
+    Accepts the GitHub-standard ``X-Hub-Signature-256`` header (value may be
+    prefixed with ``sha256=``) and the legacy ``X-Edwin-Signature`` header
+    (raw hex). Comparison is timing-safe.
+    """
+    candidates = []
+
+    hub = headers.get("X-Hub-Signature-256", "")
+    if hub:
+        prefix = "sha256="
+        candidates.append(hub[len(prefix):] if hub.startswith(prefix) else hub)
+
+    legacy = headers.get("X-Edwin-Signature", "")
+    if legacy:
+        candidates.append(legacy)
+
+    return any(
+        hmac.compare_digest(candidate, expected_hex) for candidate in candidates
+    )
 
 
 def _normalize_event(data: dict) -> dict:

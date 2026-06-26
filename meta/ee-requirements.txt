@@ -9,3 +9,7 @@
 # See https://docs.ansible.com/projects/builder/en/latest/collection_metadata/#how-to-verify-collection-level-metadata
 # to learn how to test your configuration.
 # Do not delete this file even if the collection has no dependencies!
+
+requests  # required by the 'query_api' module and 'alerts' (polling) event source
+aiohttp  # required by the 'webhook' event source
+aiokafka  # required by the 'kafka' event source
