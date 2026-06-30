@@ -105,6 +105,8 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import get_auth_token
 from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import post
 from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._rest_methods import _validate_portal
+from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._query import create_filter
+from ansible_collections.logicmonitor.edwin_ai.plugins.module_utils._query import create_order
 
 from json import dumps
 import time
@@ -164,56 +166,18 @@ def _create_request(module: AnsibleModule) -> dict:
     match p['record_type']:
         case 'alerts':
             epoch_field = 'meta.createdTimestamp'
-            request['filter'] = _create_filter('cf.eventSeverity', epoch_field, start_epoch)
-            request['order'] = _create_order(epoch_field)
+            request['filter'] = create_filter('cf.eventSeverity', epoch_field, start_epoch)
+            request['order'] = create_order(epoch_field)
         case 'events':
             epoch_field = 'meta.eventTimestamp'
-            request['filter'] = _create_filter('cf.eventSeverity', epoch_field, start_epoch)
-            request['order'] = _create_order(epoch_field)
+            request['filter'] = create_filter('cf.eventSeverity', epoch_field, start_epoch)
+            request['order'] = create_order(epoch_field)
         case 'insights':
             epoch_field = 'meta.createdTimestamp'
-            request['filter'] = _create_filter('ml.highestSeverity', epoch_field, start_epoch)
-            request['order'] = _create_order(epoch_field)
+            request['filter'] = create_filter('ml.highestSeverity', epoch_field, start_epoch)
+            request['order'] = create_order(epoch_field)
 
     return request
-
-
-def _create_filter(severity_field: str, epoch_field: str, epoch_value: int) -> dict:
-    return {
-        "expression": {
-            "AND": [
-                {
-                    "GREATER_THAN_EQUAL": [
-                        {
-                            "field": severity_field,
-                            "type": "integer"
-                        },
-                        4
-                    ],
-                },
-                {
-                    "GREATER_THAN_EQUAL": [
-                        {
-                            "field": epoch_field,
-                            "type": "long"
-                        },
-                        epoch_value
-                    ],
-                },
-            ]
-        },
-        "schemaName": "filterCondition",
-        "schemaVersion": "4",
-    }
-
-
-def _create_order(epoch_field: str) -> list:
-    return [
-        {
-            "type": "desc",
-            "field": epoch_field
-        },
-    ]
 
 
 if __name__ == "__main__":

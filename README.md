@@ -85,17 +85,11 @@ Example rulebooks live in [`extensions/eda/rulebooks`](extensions/eda/rulebooks)
   accepts the standard `X-Hub-Signature-256` header (with optional `sha256=` prefix) or the legacy
   `X-Edwin-Signature` header.
 
-### Quick local test (CLI)
+### Testing
 
-```bash
-pip install ansible-rulebook ansible-runner ansible-core requests aiohttp aiokafka
-ansible-galaxy collection install . --force
-printf 'localhost ansible_connection=local\n' > inventory.ini
-# EDWIN_PORTAL is the portal subdomain only (e.g. "mycompany"), not a URL
-export EDWIN_PORTAL=mycompany EDWIN_ACCESS_ID=... EDWIN_ACCESS_KEY=...
-ansible-rulebook --rulebook extensions/eda/rulebooks/alert_polling.yml -i inventory.ini \
-  --env-vars EDWIN_PORTAL,EDWIN_ACCESS_ID,EDWIN_ACCESS_KEY --print-events
-```
+See [docs/event-driven-ansible.md](docs/event-driven-ansible.md) for local (`ansible-rulebook` CLI)
+and AAP testing, including the Decision Environment requirement and using a vault-encrypted variables
+file for credentials.
 
 If any documentation is incorrect or incomplete, please [report an issue][create-issue] or submit a pull request.
 

@@ -1,18 +1,45 @@
-"""Receive Edwin AI alert events via webhook.
+"""Receive Edwin AI alert events via webhook."""
 
-Edwin AI pushes alert notifications to this endpoint. Configure a
-webhook integration in your LogicMonitor/Edwin AI portal pointing to
-the EDA controller's webhook URL.
+DOCUMENTATION = r"""
+---
+short_description: Receive Edwin AI alert events via an HTTP webhook.
+description:
+    - Starts an HTTP listener that receives alert notifications pushed by Edwin
+      AI (or a compatible sender) and emits them as events. Configure the sender
+      to POST to this listener's URL.
+options:
+    host:
+        description: Bind address for the webhook listener.
+        type: str
+        default: "0.0.0.0"
+    port:
+        description: Port to listen on.
+        type: int
+        default: 5000
+    token:
+        description:
+            - Optional shared secret for HMAC-SHA256 signature verification. When
+              set, the request signature is validated against an HMAC of the raw
+              body. The standard C(X-Hub-Signature-256) header is supported (value
+              may be prefixed with C(sha256=)), as is the legacy
+              C(X-Edwin-Signature) header (raw hex) for backward compatibility.
+        type: str
+        required: false
+"""
 
-Arguments:
-    host: Bind address for the webhook listener (default: 0.0.0.0)
-    port: Port to listen on (default: 5000)
-    token: Optional shared secret for HMAC signature verification
-
-When ``token`` is set, the request signature is validated against an
-HMAC-SHA256 of the raw body. The standard ``X-Hub-Signature-256`` header is
-supported (value may be prefixed with ``sha256=``), as is the legacy
-``X-Edwin-Signature`` header (raw hex) for backward compatibility.
+EXAMPLES = r"""
+- name: Receive Edwin AI alerts over a webhook
+  hosts: all
+  sources:
+    - logicmonitor.edwin_ai.webhook:
+        host: 0.0.0.0
+        port: 5000
+        token: "{{ EDWIN_WEBHOOK_SECRET }}"
+  rules:
+    - name: Critical alert
+      condition: event.edwin_ai.severity == "critical"
+      action:
+        debug:
 """
 
 import asyncio
@@ -38,10 +65,7 @@ _MAX_PAYLOAD_BYTES = 1_048_576
 async def main(queue: asyncio.Queue, args: dict[str, Any]) -> None:
     """Receive Edwin AI webhook events and forward to the EDA rulebook."""
     for exc in IMPORT_ERRORS:
-        raise ImportError(
-            "The 'aiohttp' package is required for the webhook event source. "
-            "Install it with: pip install aiohttp"
-        ) from exc
+        raise exc
 
     host = str(args.get("host", "0.0.0.0"))
     if not _VALID_HOST.match(host):
