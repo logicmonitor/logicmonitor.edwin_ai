@@ -100,5 +100,6 @@ Build one with `ansible-builder` from the published collection and register it u
    Enable **Prompt on launch** for Variables so the `extra_vars` are accepted.
 3. Create a **Rulebook Activation** using a Decision Environment that contains this collection, and select a rulebook from `aap/`.
    For the `webhook` rulebook, attach an **Event Stream** (HMAC credential) and map the source, or expose the activation port directly.
-   For the `alerts` and `kafka` rulebooks, provide the required variables and credentials.
+   Set `EDWIN_AAP_ORGANIZATION` to the Automation Controller organization that owns the referenced Job Templates.
+   For the `alerts` and `kafka` rulebooks, provide the required source variables and credentials.
 4. Send a test event and confirm the Job Template launches under **Jobs**.

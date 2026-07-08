@@ -29,6 +29,7 @@
       action:
         run_job_template:
           name: Edwin AI - Remediate Critical
+          organization: "{{ EDWIN_AAP_ORGANIZATION }}"
           job_args:
             extra_vars:
               target_host: "{{ event.edwin_ai.host }}"
@@ -43,6 +44,7 @@
       action:
         run_job_template:
           name: Edwin AI - Create Incident
+          organization: "{{ EDWIN_AAP_ORGANIZATION }}"
           job_args:
             extra_vars:
               target_host: "{{ event.edwin_ai.host }}"
