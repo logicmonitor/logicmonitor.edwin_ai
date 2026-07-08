@@ -46,50 +46,8 @@ See [using Ansible collections](https://docs.ansible.com/projects/ansible/devel/
 
 ## Event-Driven Ansible (EDA)
 
-In addition to the `query_api` module (a "pull" model for querying Edwin AI), this collection ships
-[Event-Driven Ansible][eda-docs] source plugins so Edwin AI can trigger Ansible automation in
-response to alerts.
-
-### Event source plugins
-
-| Source | Pattern | Use case |
-| --- | --- | --- |
-| `logicmonitor.edwin_ai.webhook` | Edwin AI pushes to a listener | Real-time, simplest setup |
-| `logicmonitor.edwin_ai.alerts` | EDA polls the Edwin AI API | Works behind firewalls; no inbound webhook |
-| `logicmonitor.edwin_ai.kafka` | EDA consumes from a Kafka topic | High-volume enterprise deployments |
-
-All three emit a normalized event under the `edwin_ai` key (e.g. `event.edwin_ai.host`,
-`event.edwin_ai.message`, `event.edwin_ai.status`). Note that severity representation depends on the
-source: the `webhook` source passes through the sender's value, while the `alerts` (polling) source
-reports the integer `cf.eventSeverity` (higher is more severe). Write rulebook conditions to match
-the source you use.
-
-### Example rulebooks
-
-Example rulebooks live in [`extensions/eda/rulebooks`](extensions/eda/rulebooks):
-
-* The top-level rulebooks use the `run_playbook` action and are intended for the
-  [`ansible-rulebook`][ansible-rulebook] CLI.
-* The [`aap/`](extensions/eda/rulebooks/aap) variants use the `run_job_template` action for the
-  AAP EDA controller (which does not support `run_playbook`). The referenced job templates must
-  exist in the Automation Controller with "Prompt on launch" enabled for Variables.
-
-### Two ingestion architectures for the webhook path
-
-* **AAP gateway Event Stream:** point your sender at the gateway event-stream URL. AAP authenticates
-  the request and forwards it to the rulebook; note that AAP replaces the rulebook's webhook source
-  with its own, so the `webhook` plugin's normalization does not run (the rulebook sees the raw
-  payload).
-* **Raw webhook plugin:** the sender posts directly to the `webhook` plugin's listener, in which case
-  the plugin runs and normalizes the payload into `event.edwin_ai.*`. When using HMAC, the plugin
-  accepts the standard `X-Hub-Signature-256` header (with optional `sha256=` prefix) or the legacy
-  `X-Edwin-Signature` header.
-
-### Testing
-
-See [docs/event-driven-ansible.md](docs/event-driven-ansible.md) for local (`ansible-rulebook` CLI)
-and AAP testing, including the Decision Environment requirement and using a vault-encrypted variables
-file for credentials.
+In addition to the `query_api` module (a "pull" model for querying Edwin AI), this collection ships [Event-Driven Ansible][eda-docs] source plugins so Edwin AI can trigger Ansible automation in response to alerts.
+See [docs/event-driven-ansible.md](docs/event-driven-ansible.md) for details on the `webhook`, `alerts` (polling), and `kafka` sources, along with example rulebooks and testing instructions.
 
 If any documentation is incorrect or incomplete, please [report an issue][create-issue] or submit a pull request.
 
@@ -113,7 +71,7 @@ See [LICENSE](https://github.com/logicmonitor/logicmonitor.edwin_ai/blob/main/LI
 
 [ansible-rulebook]: https://ansible.readthedocs.io/projects/rulebook/
 [create-issue]: https://github.com/logicmonitor/logicmonitor.edwin_ai/issues/new
-[eda-docs]: https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.5/html/using_automation_decisions/index
+[eda-docs]: https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/latest/html/using_automation_decisions/index
 [edwin-ai]: https://www.logicmonitor.com/edwin-ai
 [feature-request]: https://support.logicmonitor.com/hc/en-us/requests/new
 [logicmonitor]: https://www.logicmonitor.com/

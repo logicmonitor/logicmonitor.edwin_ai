@@ -28,7 +28,6 @@
       action:
         run_job_template:
           name: Edwin AI - Remediate CPU
-          organization: Default
           job_args:
             extra_vars:
               target_host: "{{ event.edwin_ai.host }}"
@@ -42,7 +41,6 @@
       action:
         run_job_template:
           name: Edwin AI - Remediate Disk
-          organization: Default
           job_args:
             extra_vars:
               target_host: "{{ event.edwin_ai.host }}"
@@ -55,7 +53,6 @@
       action:
         run_job_template:
           name: Edwin AI - Collect Diagnostics
-          organization: Default
           job_args:
             extra_vars:
               target_host: "{{ event.edwin_ai.host }}"
@@ -69,7 +66,6 @@
       action:
         run_job_template:
           name: Edwin AI - Restart Service
-          organization: Default
           job_args:
             extra_vars:
               target_host: "{{ event.edwin_ai.host }}"

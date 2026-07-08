@@ -30,7 +30,6 @@
       action:
         run_job_template:
           name: Edwin AI - Remediate Critical
-          organization: Default
           job_args:
             extra_vars:
               target_host: "{{ event.payload.host }}"

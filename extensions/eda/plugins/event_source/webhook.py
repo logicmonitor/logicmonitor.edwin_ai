@@ -21,7 +21,7 @@ options:
             - Optional shared secret for HMAC-SHA256 signature verification. When
               set, the request signature is validated against an HMAC of the raw
               body. The standard C(X-Hub-Signature-256) header is supported (value
-              may be prefixed with C(sha256=)), as is the legacy
+              may be prefixed with C(sha256=)), as is the alternative
               C(X-Edwin-Signature) header (raw hex) for backward compatibility.
         type: str
         required: false
@@ -130,7 +130,7 @@ def _verify_signature(headers: Any, expected_hex: str) -> bool:
     """Validate an HMAC-SHA256 signature against the supported headers.
 
     Accepts the GitHub-standard ``X-Hub-Signature-256`` header (value may be
-    prefixed with ``sha256=``) and the legacy ``X-Edwin-Signature`` header
+    prefixed with ``sha256=``) and the alternative ``X-Edwin-Signature`` header
     (raw hex). Comparison is timing-safe.
     """
     candidates = []
@@ -151,11 +151,14 @@ def _verify_signature(headers: Any, expected_hex: str) -> bool:
 
 def _normalize_event(data: dict) -> dict:
     """Normalize Edwin AI webhook payload to a consistent event schema."""
+    severity = data.get("severity", data.get("level", "unknown"))
+    status = data.get("status", data.get("alertStatus", "active"))
+
     return {
         "edwin_ai": {
             "event_type": data.get("type", data.get("eventType", "alert")),
             "alert_id": data.get("alertId", data.get("id", "")),
-            "severity": data.get("severity", data.get("level", "unknown")),
+            "severity": severity.lower() if isinstance(severity, str) else severity,
             "host": data.get(
                 "host", data.get("resourceName", data.get("device", ""))
             ),
@@ -171,9 +174,7 @@ def _normalize_event(data: dict) -> dict:
             "timestamp": data.get(
                 "timestamp", data.get("startEpoch", "")
             ),
-            "status": data.get(
-                "status", data.get("alertStatus", "active")
-            ),
+            "status": status.lower() if isinstance(status, str) else status,
             "raw": data,
         }
     }

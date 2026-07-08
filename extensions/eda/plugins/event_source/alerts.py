@@ -31,12 +31,13 @@ options:
         description:
             - Minimum integer event severity to emit (C(cf.eventSeverity);
               higher is more severe). A severity name
-              (C(critical)/C(error)/C(warning)/C(info)) is also accepted and
-              mapped to an integer. Unknown names raise an error.
+              (C(critical)/C(error)/C(warning)/C(info)) is also accepted
+              (case-insensitive) and mapped to an integer. Unknown names raise
+              an error.
         type: raw
         default: 4
     lookback:
-        description: Time window in seconds (ending now) to query.
+        description: Time window in seconds (ending now) to query (default: 86400, which is 1 day).
         type: int
         default: 86400
     size:
@@ -160,20 +161,6 @@ async def main(queue: asyncio.Queue, args: dict[str, Any]) -> None:
                 seen_alerts[alert_id] = dedup_key
 
                 await queue.put(_normalize_event(record))
-
-            # Alerts that fell out of the result set are treated as cleared.
-            # NOTE: results are constrained by `lookback`, so an alert can also
-            # drop out simply by ageing past the window.
-            cleared = set(seen_alerts.keys()) - current_ids
-            for alert_id in cleared:
-                await queue.put({
-                    "edwin_ai": {
-                        "event_type": "alert_cleared",
-                        "alert_id": alert_id,
-                        "status": "cleared",
-                    }
-                })
-                del seen_alerts[alert_id]
 
         except Exception:
             logger.exception("Error polling Edwin AI alerts")

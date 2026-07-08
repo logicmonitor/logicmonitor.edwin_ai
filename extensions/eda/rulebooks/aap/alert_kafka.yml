@@ -24,7 +24,6 @@
       action:
         run_job_template:
           name: Edwin AI - Remediate Critical
-          organization: Default
           job_args:
             extra_vars:
               target_host: "{{ event.edwin_ai.host }}"
@@ -38,7 +37,6 @@
       action:
         run_job_template:
           name: Edwin AI - Escalate Alert
-          organization: Default
           job_args:
             extra_vars:
               target_host: "{{ event.edwin_ai.host }}"

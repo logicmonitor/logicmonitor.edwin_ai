@@ -29,7 +29,6 @@
       action:
         run_job_template:
           name: Edwin AI - Remediate Critical
-          organization: Default
           job_args:
             extra_vars:
               target_host: "{{ event.edwin_ai.host }}"
@@ -44,19 +43,8 @@
       action:
         run_job_template:
           name: Edwin AI - Create Incident
-          organization: Default
           job_args:
             extra_vars:
               target_host: "{{ event.edwin_ai.host }}"
               alert_id: "{{ event.edwin_ai.alert_id }}"
               message: "{{ event.edwin_ai.message }}"
-
-    - name: Alert cleared - close ticket
-      condition: event.edwin_ai.event_type == "alert_cleared"
-      action:
-        run_job_template:
-          name: Edwin AI - Close Incident
-          organization: Default
-          job_args:
-            extra_vars:
-              alert_id: "{{ event.edwin_ai.alert_id }}"
