@@ -1,0 +1,83 @@
+---
+# AAP example (webhook source) using `run_job_template`.
+#
+# IMPORTANT - this rulebook reads the NORMALIZED `event.edwin_ai.*` fields, which
+# are only produced when the `logicmonitor.edwin_ai.webhook` plugin actually runs,
+# i.e. the DIRECT exposed-port mode (the sender posts straight to the activation's
+# port). If you instead map an AAP gateway Event Stream to this source, AAP swaps
+# the source out and the rulebook receives the RAW payload, so these conditions
+# will NOT match - use `alert_remediation_eventstream.yml` for the gateway path.
+#
+# Each referenced job template must exist in the Automation Controller with
+# "Prompt on launch" enabled for Variables so the `extra_vars` below are accepted.
+# (Set `include_events: false` only if you do NOT want the full matching event
+# injected alongside them.)
+# For local `ansible-rulebook` CLI runs, see the variant in the parent directory.
+- name: Edwin AI Alert Remediation
+  hosts: all
+  sources:
+    - logicmonitor.edwin_ai.webhook:
+        host: 0.0.0.0
+        port: 5000
+
+  rules:
+    - name: Critical CPU alert - restart service
+      condition: >-
+        event.edwin_ai.severity == "critical" and
+        event.edwin_ai.metric is match("cpu", ignorecase=true)
+      action:
+        run_job_template:
+          name: Edwin AI - Remediate CPU
+          organization: "{{ EDWIN_AAP_ORGANIZATION }}"
+          job_args:
+            extra_vars:
+              target_host: "{{ event.edwin_ai.host }}"
+              alert_id: "{{ event.edwin_ai.alert_id }}"
+              metric: "{{ event.edwin_ai.metric }}"
+
+    - name: Disk space alert - cleanup
+      condition: >-
+        event.edwin_ai.severity in ["critical", "error"] and
+        event.edwin_ai.metric is match("disk", ignorecase=true)
+      action:
+        run_job_template:
+          name: Edwin AI - Remediate Disk
+          organization: "{{ EDWIN_AAP_ORGANIZATION }}"
+          job_args:
+            extra_vars:
+              target_host: "{{ event.edwin_ai.host }}"
+              alert_id: "{{ event.edwin_ai.alert_id }}"
+
+    - name: Memory alert - collect diagnostics
+      condition: >-
+        event.edwin_ai.severity == "critical" and
+        event.edwin_ai.metric is match("memory", ignorecase=true)
+      action:
+        run_job_template:
+          name: Edwin AI - Collect Diagnostics
+          organization: "{{ EDWIN_AAP_ORGANIZATION }}"
+          job_args:
+            extra_vars:
+              target_host: "{{ event.edwin_ai.host }}"
+              alert_id: "{{ event.edwin_ai.alert_id }}"
+              diagnostic_type: memory
+
+    - name: Service down alert - restart
+      condition: >-
+        event.edwin_ai.event_type == "alert" and
+        event.edwin_ai.message is match("down|stopped|unavailable", ignorecase=true)
+      action:
+        run_job_template:
+          name: Edwin AI - Restart Service
+          organization: "{{ EDWIN_AAP_ORGANIZATION }}"
+          job_args:
+            extra_vars:
+              target_host: "{{ event.edwin_ai.host }}"
+              alert_id: "{{ event.edwin_ai.alert_id }}"
+              service_info: "{{ event.edwin_ai.message }}"
+
+    - name: Alert cleared - log resolution
+      condition: event.edwin_ai.status == "cleared"
+      action:
+        print_event:
+          pretty: true

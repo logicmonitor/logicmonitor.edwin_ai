@@ -1,4 +1,7 @@
 ---
+# CLI example: uses `run_playbook`, which is supported only by the
+# `ansible-rulebook` CLI. To run on the AAP controller, use the equivalent
+# rulebook under `extensions/eda/rulebooks/aap/` (which uses `run_job_template`).
 - name: Edwin AI Alert Polling
   hosts: all
   sources:
@@ -7,12 +10,16 @@
         access_id: "{{ EDWIN_ACCESS_ID }}"
         access_key: "{{ EDWIN_ACCESS_KEY }}"
         interval: 60
-        severity: warning
+        # min_severity is the integer cf.eventSeverity threshold (higher = more severe)
+        min_severity: 4
+        lookback: 86400
 
+  # NOTE: for the polling source, event.edwin_ai.severity is the INTEGER
+  # cf.eventSeverity (higher is more severe), so conditions use numeric comparisons.
   rules:
-    - name: New critical alert - immediate remediation
+    - name: High-severity alert - immediate remediation
       condition: >-
-        event.edwin_ai.severity == "critical" and
+        event.edwin_ai.severity >= 4 and
         event.edwin_ai.status == "active"
       action:
         run_playbook:
@@ -23,9 +30,9 @@
             severity: "{{ event.edwin_ai.severity }}"
             message: "{{ event.edwin_ai.message }}"
 
-    - name: New error alert - create ticket and notify
+    - name: Medium-severity alert - create ticket and notify
       condition: >-
-        event.edwin_ai.severity == "error" and
+        event.edwin_ai.severity == 3 and
         event.edwin_ai.status == "active"
       action:
         run_playbook:
@@ -34,11 +41,3 @@
             target_host: "{{ event.edwin_ai.host }}"
             alert_id: "{{ event.edwin_ai.alert_id }}"
             message: "{{ event.edwin_ai.message }}"
-
-    - name: Alert cleared - close ticket
-      condition: event.edwin_ai.event_type == "alert_cleared"
-      action:
-        run_playbook:
-          name: close_incident.yml
-          extra_vars:
-            alert_id: "{{ event.edwin_ai.alert_id }}"

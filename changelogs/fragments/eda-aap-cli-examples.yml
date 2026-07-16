@@ -1,0 +1,33 @@
+---
+minor_changes:
+  - >-
+    webhook event source - accept the standard ``X-Hub-Signature-256`` HMAC
+    header (with optional ``sha256=`` prefix) in addition to the legacy
+    ``X-Edwin-Signature`` header for signature verification.
+  - >-
+    eda rulebooks - add AAP-ready example rulebooks under
+    ``extensions/eda/rulebooks/aap/`` that use ``run_job_template`` (supported by
+    the AAP EDA controller), alongside the existing ``ansible-rulebook`` CLI
+    examples that use ``run_playbook``. Includes a raw-payload variant for the
+    AAP gateway Event Stream path.
+  - >-
+    playbooks - add an example ``playbooks/debug_event.yml`` that prints the
+    variables passed by a rulebook, so AAP job templates triggered by EDA have a
+    runnable smoke-test target.
+bugfixes:
+  - >-
+    webhook event source - guard the optional ``aiohttp`` import so module
+    import (and sanity/import checks) no longer fail when the dependency is
+    absent.
+  - >-
+    requirements - declare the ``aiohttp`` and ``aiokafka`` runtime dependencies
+    needed by the webhook and kafka event sources in ``requirements.txt`` and
+    ``meta/ee-requirements.txt``.
+  - >-
+    alerts (polling) event source - query the real Edwin AI endpoint
+    ``POST /ui/query/records`` (as the ``query_api`` module does) instead of the
+    non-existent ``GET /api/v1/alerts`` that returned HTTP 404, and read records
+    from ``results``. Normalize using the real record keys
+    (``cf.*``/``meta.*``/``alertDetails.*``); ``severity`` is now the integer
+    ``cf.eventSeverity``. Adds ``min_severity`` (integer threshold) and
+    ``lookback`` arguments.

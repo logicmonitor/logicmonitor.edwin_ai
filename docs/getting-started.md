@@ -64,6 +64,11 @@ Once the collection is accessible, you can execute a playbook against it:
 ansible-playbook sample_playbook --ask-vault-pass
 ```
 
+## Event-Driven Ansible (EDA)
+
+This collection also ships Event-Driven Ansible source plugins and example rulebooks.
+EDA setup and testing is documented separately in [Event-Driven Ansible](event-driven-ansible.md).
+
 ## Publication
 
 After merging code to the repo, the collection should be republished.

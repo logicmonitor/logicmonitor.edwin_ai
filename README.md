@@ -44,10 +44,11 @@ ansible-galaxy collection install logicmonitor.edwin_ai:==0.1.0
 
 See [using Ansible collections](https://docs.ansible.com/projects/ansible/devel/user_guide/collections_using.html) for more details.
 
-## Example Rulebooks
+## Event-Driven Ansible (EDA)
 
-For examples, please refer to the individual plugins.
-Each plugin must document itself and its parameters.
+In addition to the `query_api` module (a "pull" model for querying Edwin AI), this collection ships [Event-Driven Ansible][eda-docs] source plugins so Edwin AI can trigger Ansible automation in response to alerts.
+See [docs/event-driven-ansible.md](docs/event-driven-ansible.md) for details on the `webhook`, `alerts` (polling), and `kafka` sources, along with example rulebooks and testing instructions.
+
 If any documentation is incorrect or incomplete, please [report an issue][create-issue] or submit a pull request.
 
 ## Release notes
@@ -68,7 +69,9 @@ Apache License, Version 2.0
 
 See [LICENSE](https://github.com/logicmonitor/logicmonitor.edwin_ai/blob/main/LICENSE) to see the full text.
 
+[ansible-rulebook]: https://ansible.readthedocs.io/projects/rulebook/
 [create-issue]: https://github.com/logicmonitor/logicmonitor.edwin_ai/issues/new
+[eda-docs]: https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/latest/html/using_automation_decisions/index
 [edwin-ai]: https://www.logicmonitor.com/edwin-ai
 [feature-request]: https://support.logicmonitor.com/hc/en-us/requests/new
 [logicmonitor]: https://www.logicmonitor.com/
