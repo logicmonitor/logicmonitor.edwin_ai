@@ -47,7 +47,7 @@ See [using Ansible collections](https://docs.ansible.com/projects/ansible/devel/
 ## Event-Driven Ansible (EDA)
 
 In addition to the `query_api` module (a "pull" model for querying Edwin AI), this collection ships [Event-Driven Ansible][eda-docs] source plugins so Edwin AI can trigger Ansible automation in response to alerts.
-See [docs/event-driven-ansible.md](docs/event-driven-ansible.md) for details on the `webhook`, `alerts` (polling), and `kafka` sources, along with example rulebooks and testing instructions.
+See [Event-Driven Ansible documentation][eda-collection-docs] for details on the `webhook`, `alerts` (polling), and `kafka` sources, along with example rulebooks and testing instructions.
 
 If any documentation is incorrect or incomplete, please [report an issue][create-issue] or submit a pull request.
 
@@ -57,6 +57,7 @@ See the [changelog](https://github.com/logicmonitor/logicmonitor.edwin_ai/blob/m
 
 ## Support
 
+* Red Hat Ansible Automation Hub customers: open a support case using the **Create issue** button on the collection page in Automation Hub.
 * For feature requests, please [submit a feature request][feature-request] for consideration in our product roadmap.
 * For bugs, please [submit a feature request][feature-request] or [report an issue][create-issue] with a clear replication path.
    * Pull requests are also encouraged.
@@ -71,6 +72,7 @@ See [LICENSE](https://github.com/logicmonitor/logicmonitor.edwin_ai/blob/main/LI
 
 [ansible-rulebook]: https://ansible.readthedocs.io/projects/rulebook/
 [create-issue]: https://github.com/logicmonitor/logicmonitor.edwin_ai/issues/new
+[eda-collection-docs]: https://github.com/logicmonitor/logicmonitor.edwin_ai/blob/main/docs/event-driven-ansible.md
 [eda-docs]: https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/latest/html/using_automation_decisions/index
 [edwin-ai]: https://www.logicmonitor.com/edwin-ai
 [feature-request]: https://support.logicmonitor.com/hc/en-us/requests/new
