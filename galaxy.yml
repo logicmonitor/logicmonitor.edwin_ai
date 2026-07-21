@@ -3,7 +3,7 @@
 
 namespace: logicmonitor
 name: edwin_ai
-version: 1.1.0
+version: 1.2.0
 readme: README.md
 authors:
   - stair (github.com/stair-lm)
@@ -27,3 +27,27 @@ build_ignore:
   # https://docs.ansible.com/projects/ansible/devel/dev_guide/developing_collections_distributing.html#ignoring-files-and-folders
   - .gitignore
   - changelogs/.plugin-cache.yaml
+  - .venv
+  - .venv/*
+  - .git
+  - .git/*
+  - .github
+  - .github/*
+  - .idea
+  - .idea/*
+  - .vscode
+  - .vscode/*
+  - __pycache__
+  - '*/__pycache__'
+  - '*.tar.gz'
+  - EDA_INTEGRATION_GUIDE.md
+  - inventory.ini
+  - local_test_rulebook.yml
+  - requirements.yml
+  - vars.yml
+  - vault.yml
+  - codecov.yml
+  - sample_playbook.yml
+  - REVIEW_CHECKLIST.md
+  - SECURITY.md
+  - MAINTAINERS
